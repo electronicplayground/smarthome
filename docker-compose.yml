@@ -1,0 +1,75 @@
+version: '3.4'
+
+services:
+  smarthome_db:
+    image: postgres:13.1
+    container_name: smarthome_db
+    environment:
+      POSTGRES_PASSWORD: passw0rd
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - type: bind
+        source: ./docker-compose-context/database/pgdata
+        target: /var/lib/postgresql/data/pgdata
+    expose:
+      - "5432"
+    ports:
+      - "8432:5432"
+
+
+  smarthome_mosquitto:
+    image: eclipse-mosquitto
+    container_name: smarthome_mosquitto
+    volumes:
+      - ./docker-compose-context/mosquitto/mosquitto.conf:/mosquitto/mosquitto.conf
+      - type: bind
+        source: ./docker-compose-context/mosquitto/data
+        target: /mosquitto/data
+      - type: bind
+        source: ./docker-compose-context/mosquitto/log
+        target: /mosquitto/log
+    expose:
+      - "1883"
+      - "9001"
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+      
+
+  smarthome_nodered:
+    image: nodered/node-red
+    container_name: smarthome_nodered
+    volumes:
+      - type: bind
+        source: ./docker-compose-context/smarthome_nodered
+        target: /data
+    expose:
+      - "2880"
+    ports:
+      - "2880:1880"
+    depends_on: 
+      - smarthome_mosquitto
+
+  
+  homeassistant:
+    image: homeassistant/home-assistant:stable
+    # image: homeassistant
+    # build:
+    #   context: ./homeassistant/.
+    #   dockerfile: homeassistant.dockerfile
+    container_name: homeassistant
+    volumes:
+      - type: bind
+        source: ./docker-compose-context/homeassistant
+        target: /config
+    expose:
+      - "8123"
+    ports:
+      - "8123:8123"
+    depends_on: 
+      - smarthome_mosquitto
+      - smarthome_db
+
+# docker run -it -p 1883:1883 -p 9001:9001 -v mosquitto.conf:/mosquitto/config/mosquitto.conf eclipse-mosquitto
+# docker run -it -p 1883:1883 -p 9001:9001 -v mosquitto.conf:/mosquitto/config/mosquitto.conf -v /mosquitto/data -v /mosquitto/log eclipse-mosquitto
+# docker run -d --name="home-assistant" -v /PATH_TO_YOUR_CONFIG:/config -v /etc/localtime:/etc/localtime:ro --net=host homeassistant/home-assistant:stable
