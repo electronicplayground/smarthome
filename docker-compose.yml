@@ -69,13 +69,3 @@ services:
     depends_on: 
       - smarthome_mosquitto
       - smarthome_db
-
-  # run a debian container
-  debian:
-    image: debian:latest
-    restart: on-failure
-    network_mode: "host"
-    command: ["sleep","infinity"]
-    container_name: debian
-    devices:
-    - "/dev/ttyUSB0:/dev/ttyUSB0"

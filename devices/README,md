@@ -1,0 +1,18 @@
+## Platformio
+
+```bash
+docker build . -f platformio.dockerfile -t platformio
+```
+
+```bash
+docker run --privilege -i -t electronicplayground/platformio:latest /bin/bash
+```
+
+In container:
+```bash
+source /root/.platformio/penv/bin/activate
+```
+
+```bash
+pio --version
+```
