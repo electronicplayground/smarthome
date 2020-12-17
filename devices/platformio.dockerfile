@@ -26,4 +26,6 @@ RUN wget https://raw.githubusercontent.com/platformio/platformio-core-installer/
 
 RUN python3.8 get-platformio.py
 
+RUN apt-get update && apt-get install -y vim
+
 # RUN source /root/.platformio/penv/bin/activate
