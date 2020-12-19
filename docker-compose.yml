@@ -69,3 +69,23 @@ services:
     depends_on: 
       - smarthome_mosquitto
       - smarthome_db
+
+  serial-controller:
+    container_name: 'serial-controller'
+    build:
+      dockerfile: serial_controller.dockerfile
+      context: ./serial_controller/.
+    image: serial-controller
+    environment:
+      MQTT_BROKER: smarthome_mosquitto
+    # devices:
+    #     - "/dev/ttyUSB0:/dev/ttyUSB0"
+    depends_on: 
+      - smarthome_mosquitto
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+        reservations:
+          memory: 1000M
+      

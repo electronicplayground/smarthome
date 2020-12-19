@@ -2,23 +2,32 @@
 from aiohttp import web
 import asyncio
 import serial
-import paho.mqtt.client as mqtt
+# import paho.mqtt.client as mqtt
 
+from mqtt_client import MqttClientMixin
+
+from configuration.config_keys import ConfigKeys
+from configuration.configuration import Configuration
+
+config = Configuration.Instance()
 
 async def handle(request):
     name = request.match_info.get('name', "Anonymous")
     text = "Hello, " + name
     return web.Response(text=text)
 
-import paho.mqtt.client as mqtt
 
-
-class Server:
+class Server(MqttClientMixin):
     def __init__(self):
         self._app = web.Application()
-        self._app.add_routes([web.get('/', handle),
-                         web.get('/echo', self.wshandle),
-                         web.get('/{name}', handle)])
+        print(config[ConfigKeys.WS_ENDPOINT])
+        self._app.add_routes(
+            [
+                web.get(config[ConfigKeys.WS_ENDPOINT], self.wshandle),
+            ]
+        )
+        # self._app.add_routes([web.get('/', handle),
+        #                       web.get('/{name}', handle)])
         self._app.on_startup.append(self.start_background_tasks)
         self._app.on_cleanup.append(self.cleanup_background_tasks)
 
@@ -28,29 +37,23 @@ class Server:
 
         self._serial = serial.Serial()
 
-        
-        self._client = mqtt.Client()
-        self._client.on_connect = self.on_connect
-        self._client.on_message = self.on_message
-
-    def on_connect(self, client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
-
-        # Subscribing in on_connect() means that if we lose the connection and
-        # reconnect then subscriptions will be renewed.
-        client.subscribe("/test")
-
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):
         print(msg.topic+" "+str(msg.payload))
+        try:
+            print("Try write to queue")
+            self._serial_write_queue.put_nowait(str(msg.payload))
+        except Exception as e:
+            print(e)
+        print("added to queue")
 
     async def mqtt_run(self, app):
-        self._client.connect("localhost", 1883, 60)
+        if not self.mqtt_enabled:
+            return
         while True:
             await asyncio.sleep(0.1)
-            self._client.loop()
+            self.loop()
 
-            
     async def read_serial_async(self, app):  
         while True:
             await asyncio.sleep(0.1)
@@ -68,17 +71,18 @@ class Server:
             await asyncio.sleep(0.1)
             if not self._serial_read_queue.empty():
                 msg = await self._serial_read_queue.get()
-                self._client.publish("/serial", payload=str(msg), qos=0, retain=False)
+                self.publish(config[ConfigKeys.MQTT_PUBLISH_TOPIC], msg)
                 for ws_client in self._ws_clients:
                     if not ws_client.closed:
                         await ws_client.send_str(str(msg))
                        
-
     async def serial_write_queue(self, app):
             while True:
                 await asyncio.sleep(0.1)
                 if not self._serial_write_queue.empty():
+                    
                     msg = await self._serial_write_queue.get()
+                    print(f"Writing to serial {msg}")
                     if self._serial.is_open:
                         self._serial.write(str.encode(f"{str(msg)}\n"))
                     
@@ -97,13 +101,21 @@ class Server:
 
         return ws
 
-    async def start_background_tasks(self, app):
+    def open_serial(self):
+        if not config[ConfigKeys.SERIAL_PORT]:
+            print("Serial port not configured.")
+            return
         if not self._serial.is_open:
             print("Opening serial")
-            self._serial.port = "COM3"
+            self._serial.port = config[ConfigKeys.SERIAL_PORT]
             self._serial.baudrate = 9600
             self._serial.timeout = 1
             self._serial.open()
+
+
+    async def start_background_tasks(self, app):
+        self.open_serial()
+       
         app['serial_driver'] = asyncio.create_task(self.read_serial_async(app))
         app['serial_read_queue'] = asyncio.create_task(self.serial_read_queue(app))
         app['serial_write_queue'] = asyncio.create_task(self.serial_write_queue(app))
@@ -112,7 +124,7 @@ class Server:
     async def cleanup_background_tasks(self, app):
         # await asyncio.sleep(0.1)
         self._serial.close()
-        self._client.disconnect()
+        self.disconnect()
         app['serial_driver'].cancel()
         await app['serial_driver']
         app['serial_read_queue'].cancel()
@@ -123,6 +135,7 @@ class Server:
         await app['mqtt_run']
 
     def run(self):
+        self.initalize_mqtt()
         web.run_app(self._app, host='0.0.0.0', port=8001)
 
 

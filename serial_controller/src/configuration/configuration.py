@@ -15,7 +15,9 @@ class EnvironmentVariablesMixin(object):
             if v:
                 self.items[k] = v
             else:
-                print(f"Environment config not found for key {k}")
+                default = ConfigKeys.DEFAULTS.get(k)
+                print(f"Environment config not found for {k}. Default {default}")
+                self.items[k] = default
         
         self._env_loaded = True
 
