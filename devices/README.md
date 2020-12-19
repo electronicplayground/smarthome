@@ -1,5 +1,6 @@
 ## Platformio
 
+Build image and push
 ```bash
 docker build . -f platformio.dockerfile -t electronicplayground/platformio:latest
 docker image push electronicplayground/platformio:latest
@@ -23,4 +24,9 @@ source /root/.platformio/penv/bin/activate
 
 ```bash
 pio --version
+```
+
+pyserial serial term
+```bash
+python -m serial.tools.miniterm <port_name>
 ```

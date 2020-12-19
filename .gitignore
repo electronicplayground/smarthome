@@ -2,3 +2,8 @@
 docker-compose-context/mosquitto/
 docker-compose-context/smarthome_nodered/
 docker-compose-context/homeassistant/
+
+.pio/
+
+venv/
+__pycache__/
