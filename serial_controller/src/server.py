@@ -39,10 +39,11 @@ class Server(MqttClientMixin):
 
     # The callback for when a PUBLISH message is received from the server.
     def on_message(self, client, userdata, msg):
-        print(msg.topic+" "+str(msg.payload))
+        print(msg.topic)
+        print(msg.payload.decode('utf-8'))
         try:
             print("Try write to queue")
-            self._serial_write_queue.put_nowait(str(msg.payload))
+            self._serial_write_queue.put_nowait(msg.payload.decode('utf-8'))
         except Exception as e:
             print(e)
         print("added to queue")

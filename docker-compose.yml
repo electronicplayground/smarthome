@@ -16,6 +16,23 @@ services:
     ports:
       - "8432:5432"
 
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: passw0rd
+    ports:
+      - 27017:27017
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: passw0rd
 
   smarthome_mosquitto:
     image: eclipse-mosquitto
@@ -51,41 +68,21 @@ services:
       - smarthome_mosquitto
 
   
-  homeassistant:
-    image: homeassistant/home-assistant:stable
-    # image: homeassistant
-    # build:
-    #   context: ./homeassistant/.
-    #   dockerfile: homeassistant.dockerfile
-    container_name: homeassistant
-    volumes:
-      - type: bind
-        source: ./docker-compose-context/homeassistant
-        target: /config
-    expose:
-      - "8123"
-    ports:
-      - "8123:8123"
-    depends_on: 
-      - smarthome_mosquitto
-      - smarthome_db
-
-  serial-controller:
-    container_name: 'serial-controller'
-    build:
-      dockerfile: serial_controller.dockerfile
-      context: ./serial_controller/.
-    image: serial-controller
-    environment:
-      MQTT_BROKER: smarthome_mosquitto
-    # devices:
-    #     - "/dev/ttyUSB0:/dev/ttyUSB0"
-    depends_on: 
-      - smarthome_mosquitto
-    deploy:
-      resources:
-        limits:
-          memory: 1000M
-        reservations:
-          memory: 1000M
-      
+  # homeassistant:
+  #   image: homeassistant/home-assistant:stable
+  #   # image: homeassistant
+  #   # build:
+  #   #   context: ./homeassistant/.
+  #   #   dockerfile: homeassistant.dockerfile
+  #   container_name: homeassistant
+  #   volumes:
+  #     - type: bind
+  #       source: ./docker-compose-context/homeassistant
+  #       target: /config
+  #   expose:
+  #     - "8123"
+  #   ports:
+  #     - "8123:8123"
+  #   depends_on: 
+  #     - smarthome_mosquitto
+  #     - smarthome_db

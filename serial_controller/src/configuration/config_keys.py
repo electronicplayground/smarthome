@@ -20,11 +20,13 @@ class ConfigKeys:
     )
 
     DEFAULTS = {
+        SERIAL_PORT: "COM9",
+        SERIAL_BAUD_RATE: 9600,
         WS_PORT: 8001,
         WS_ENDPOINT: '/ws',
-        MQTT_PUBLISH_TOPIC: '/serial_controller/out',
-        MQTT_SUBSCRIBE_TOPIC: '/serial_controller/in',
+        MQTT_PUBLISH_TOPIC: '/433mhz_controller/out',
+        MQTT_SUBSCRIBE_TOPIC: '/433mhz_controller/in',
         MQTT_PORT: 1883,
-        MQTT_BROKER: 'localhost',
+        MQTT_BROKER: '192.168.0.31',
     }
 
