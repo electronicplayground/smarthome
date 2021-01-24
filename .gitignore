@@ -4,6 +4,7 @@ docker-compose-context/smarthome_nodered/
 docker-compose-context/homeassistant/
 
 .pio/
+lib/
 
 venv/
 __pycache__/
