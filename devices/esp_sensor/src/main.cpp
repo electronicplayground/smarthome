@@ -14,23 +14,9 @@
 #include "config.h"
 #include "connectivity.h"
 
-// WiFiClient espClient;
-// PubSubClient client(espClient);
-
 Timer t;
 
-// const char* mqtt_server = "192.168.0.31";
-// const char* client_name = "esp8266_x";
-// char* topic_in = "/sensors/esp8266_x/in";
-// char* topic_out = "/sensors/esp8266_x/out";
-
-
-
-
-
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, RGB_PIN, NEO_GRB + NEO_KHZ800);
-
-
 
 DHT dht(DHT_PIN, DHTTYPE);
 
@@ -41,12 +27,7 @@ DHT dht(DHT_PIN, DHTTYPE);
 //   Serial.println(myWiFiManager->getConfigPortalSSID());
 // }
 
-
-long lastMsg = 0;
-//char msg[50];
 int pirState = LOW;
-
-
 
 void PIR() {
   int oldState = pirState;
