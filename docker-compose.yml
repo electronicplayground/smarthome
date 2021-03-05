@@ -12,9 +12,9 @@ services:
         source: ./docker-compose-context/database/pgdata
         target: /var/lib/postgresql/data/pgdata
     expose:
-      - "5432"
+      - "9432"
     ports:
-      - "8432:5432"
+      - "9432:5432"
 
   mongo:
     image: mongo
@@ -38,7 +38,9 @@ services:
     image: eclipse-mosquitto
     container_name: smarthome_mosquitto
     volumes:
-      - ./docker-compose-context/mosquitto/mosquitto.conf:/mosquitto/mosquitto.conf
+      - type: bind
+        source: ./docker-compose-context/mosquitto/config/mosquitto.config
+        target: /mosquitto/mosquitto.config
       - type: bind
         source: ./docker-compose-context/mosquitto/data
         target: /mosquitto/data
