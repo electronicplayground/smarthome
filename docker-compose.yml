@@ -37,10 +37,13 @@ services:
   smarthome_mosquitto:
     image: eclipse-mosquitto
     container_name: smarthome_mosquitto
+    user: "1000:1000"
     volumes:
-      - type: bind
-        source: ./docker-compose-context/mosquitto/config/mosquitto.config
-        target: /mosquitto/mosquitto.config
+      - ./docker-compose-context/mosquitto/config/:/mosquitto/config/
+      - ./docker-compose-context/mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+        #- type: bind
+        #source: ./docker-compose-context/mosquitto/config/mosquitto.config
+        #target: /mosquitto/mosquitto.config
       - type: bind
         source: ./docker-compose-context/mosquitto/data
         target: /mosquitto/data
