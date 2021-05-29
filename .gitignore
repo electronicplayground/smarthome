@@ -8,3 +8,8 @@ lib/
 
 venv/
 __pycache__/
+
+**/.vs
+**/.vscode
+bin/
+obj/
