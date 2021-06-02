@@ -76,18 +76,18 @@ services:
     depends_on: 
       - smarthome_mosquitto
 
-  iot_hub:
-    image: iot_hub
-    build:
-      context: .\IoTHub
-      dockerfile: Dockerfile
-    container_name: iot_hub
-    environment:
-      MQTT_TOPIC: 123456789
-      MQTT_BROKER: smarthome_mosquitto
-      MQTT_PORT: 1883
-    depends_on: 
-      - smarthome_mosquitto
+  # iot_hub:
+  #   image: iot_hub
+  #   build:
+  #     context: .\IoTHub
+  #     dockerfile: Dockerfile
+  #   container_name: iot_hub
+  #   environment:
+  #     MQTT_TOPIC: 123456789
+  #     MQTT_BROKER: smarthome_mosquitto
+  #     MQTT_PORT: 1883
+  #   depends_on: 
+  #     - smarthome_mosquitto
 
   # homeassistant:
   #   image: homeassistant/home-assistant:stable
